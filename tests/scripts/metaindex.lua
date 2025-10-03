@@ -65,3 +65,24 @@ do
     t.foo = 4
     assert(idx.foo == 4)
 end
+
+do
+    local inserting = true
+    local t = setmetatable({}, {__len = function()
+        return 10
+    end,
+    __index = function(t, i)
+        if inserting then
+            error("table.insert should not call __index")
+        else
+            return rawget(t, i)
+        end
+    end,
+    __newindex = function(t, i, v)
+        error("table.insert should not call __newindex")
+    end})
+
+    table.insert(t, 42)
+    inserting = false
+    assert(t[11] == 42)
+end

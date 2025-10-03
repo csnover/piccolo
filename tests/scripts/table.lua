@@ -344,7 +344,6 @@ do
         log,
         {
             { "len" },
-            { "newindex", 6, 2 }
         }
     ))
 
@@ -360,15 +359,6 @@ do
         log,
         {
             { "len" },
-            { "index", 6 },
-            { "newindex", 7, 2 },
-            { "index", 5 },
-            { "newindex", 6, 8 },
-            { "index", 4 },
-            { "newindex", 5, 7 },
-            { "index", 3 },
-            { "newindex", 4, 6 },
-            { "newindex", 3, nil }
         }
     ))
 end

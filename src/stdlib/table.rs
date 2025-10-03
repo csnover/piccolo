@@ -329,11 +329,7 @@ fn table_insert_impl<'gc>(
 
     let metatable = table.metatable();
     let use_fallback = metatable
-        .map(|mt| {
-            !mt.get_value(ctx, MetaMethod::Len).is_nil()
-                || !mt.get_value(ctx, MetaMethod::Index).is_nil()
-                || !mt.get_value(ctx, MetaMethod::NewIndex).is_nil()
-        })
+        .map(|mt| !mt.get_value(ctx, MetaMethod::Len).is_nil())
         .unwrap_or(false);
 
     if !use_fallback {
@@ -421,23 +417,23 @@ fn table_insert_impl<'gc>(
             if index < end_index {
                 // Could make this more efficient by inlining the stack manipulation;
                 // only pushing the table once.
-                for i in (index + 1..=end_index).rev() {
-                    // Push table[i - 1] onto the stack
-                    index_helper(&mut seq, &table, i - 1, 0).await?;
-                    let value = seq.enter(|ctx, locals, _, mut stack| {
-                        locals.stash(&ctx, stack.pop_back().unwrap_or_default())
-                    });
-                    // table[i] = table[i - 1]
-                    index_set_helper(&mut seq, &table, i, value, 0).await?;
-
-                    seq.enter(|_, _, mut exec, _| {
+                seq.try_enter(|ctx, locals, mut exec, _| {
+                    let table = locals.fetch(&table);
+                    for i in (index + 1..=end_index).rev() {
+                        let value = table.get_raw((i - 1).into());
+                        table.set_raw(&ctx, i.into(), value)?;
                         exec.fuel().consume(FUEL_PER_SHIFTED_ITEM as i32);
-                    });
-                }
+                    }
+                    Ok(())
+                })?;
             }
 
-            // table[index] = value
-            index_set_helper(&mut seq, &table, index, value, 0).await?;
+            seq.try_enter(|ctx, locals, _, _| {
+                let table = locals.fetch(&table);
+                let value = locals.fetch(&value);
+                table.set_raw(&ctx, index.into(), value)?;
+                Ok(())
+            })?;
 
             Ok(SequenceReturn::Return)
         }
