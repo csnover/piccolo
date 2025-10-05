@@ -1,7 +1,7 @@
 use gc_arena::Collect;
 
 use crate::types::{
-    ConstantIndex16, ConstantIndex8, Opt254, PrototypeIndex, RegisterIndex, UpValueIndex, VarCount,
+    ConstantIndex32, ConstantIndex8, Opt254, PrototypeIndex, RegisterIndex, UpValueIndex, VarCount,
 };
 
 #[derive(Debug, Copy, Clone, Collect)]
@@ -32,7 +32,7 @@ pub enum Operation {
     },
     LoadConstant {
         dest: RegisterIndex,
-        constant: ConstantIndex16,
+        constant: ConstantIndex32,
     },
     LoadBool {
         dest: RegisterIndex,
@@ -1164,7 +1164,7 @@ enum OpCodeRepr {
     },
     LoadConstant {
         dest: RegisterIndex,
-        constant: ConstantIndex16,
+        constant: ConstantIndex32,
     },
     LoadBool {
         dest: RegisterIndex,

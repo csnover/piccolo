@@ -12,10 +12,10 @@ pub struct RegisterIndex(pub u8);
 #[collect(require_static)]
 pub struct ConstantIndex8(pub u8);
 
-/// A 16 bit index into the constant table
+/// A 32 bit index into the constant table
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Collect)]
 #[collect(require_static)]
-pub struct ConstantIndex16(pub u16);
+pub struct ConstantIndex32(pub u32);
 
 /// An index into the upvalue table
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Collect)]

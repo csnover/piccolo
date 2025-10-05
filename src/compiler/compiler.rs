@@ -11,7 +11,7 @@ use crate::{
     constant::IdenticalConstant,
     opcode::{OpCode, Operation, RCIndex},
     types::{
-        ConstantIndex16, ConstantIndex8, Opt254, PrototypeIndex, RegisterIndex, UpValueDescriptor,
+        ConstantIndex32, ConstantIndex8, Opt254, PrototypeIndex, RegisterIndex, UpValueDescriptor,
         UpValueIndex, VarCount,
     },
     Constant,
@@ -188,7 +188,7 @@ struct CompilerFunction<S> {
     parameters: Vec<S>,
 
     constants: Vec<Constant<S>>,
-    constant_table: HashMap<IdenticalConstant<S>, ConstantIndex16>,
+    constant_table: HashMap<IdenticalConstant<S>, ConstantIndex32>,
 
     upvalues: Vec<(S, UpValueDescriptor)>,
     functions: Vec<CompiledPrototype<S>>,
@@ -1593,7 +1593,7 @@ impl<S: StringInterner> Compiler<S> {
     fn get_constant(
         &mut self,
         constant: Constant<S::String>,
-    ) -> Result<ConstantIndex16, CompileErrorKind> {
+    ) -> Result<ConstantIndex32, CompileErrorKind> {
         match self
             .current_function
             .constant_table
@@ -1601,7 +1601,7 @@ impl<S: StringInterner> Compiler<S> {
         {
             hash_map::Entry::Occupied(occupied) => Ok(*occupied.get()),
             hash_map::Entry::Vacant(vacant) => {
-                let c = ConstantIndex16(
+                let c = ConstantIndex32(
                     (self.current_function.constants.len())
                         .try_into()
                         .map_err(|_| CompileErrorKind::Constants)?,
