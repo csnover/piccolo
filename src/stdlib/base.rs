@@ -321,6 +321,7 @@ pub fn load_base<'gc>(ctx: Context<'gc>) {
         "ipairs",
         Callback::from_fn_with(&ctx, inext, move |inext, ctx, _, mut stack| {
             stack.into_front(ctx, *inext);
+            stack.into_back(ctx, 0);
             Ok(CallbackReturn::Return)
         }),
     );

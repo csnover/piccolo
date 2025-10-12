@@ -70,6 +70,19 @@ do
 end
 
 do
+  local t = { 1, 2, 3 }
+  local o = {}
+  local iter, a, i = ipairs(t)
+  i = i + 1
+  for _, v in iter, a, i do
+    table.insert(o, v)
+  end
+  assert(#o == 2)
+  assert(o[1] == 2)
+  assert(o[2] == 3)
+end
+
+do
   local t = {}
   setmetatable(t, {
     __pairs = function()
