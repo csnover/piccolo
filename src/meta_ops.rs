@@ -779,7 +779,7 @@ pub fn concat<'gc>(
             for value in [a, b] {
                 match value {
                     Value::Integer(i) => write!(&mut bytes, "{}", i).unwrap(),
-                    Value::Number(n) => write!(&mut bytes, "{}", n).unwrap(),
+                    value @ Value::Number(_) => write!(&mut bytes, "{}", value.display()).unwrap(),
                     Value::String(s) => bytes.extend(s.as_bytes()),
                     _ => return None,
                 }
@@ -829,7 +829,7 @@ pub fn concat_many<'gc>(
         for value in values {
             match value {
                 Value::Integer(i) => write!(&mut bytes, "{}", i).unwrap(),
-                Value::Number(n) => write!(&mut bytes, "{}", n).unwrap(),
+                value @ Value::Number(_) => write!(&mut bytes, "{}", value.display()).unwrap(),
                 Value::String(s) => bytes.extend(s.as_bytes()),
                 _ => unreachable!(),
             }
@@ -893,7 +893,7 @@ pub fn concat_separated<'gc>(
         if let Some(val) = iter.next() {
             match val {
                 Value::Integer(i) => write!(&mut bytes, "{}", i).unwrap(),
-                Value::Number(n) => write!(&mut bytes, "{}", n).unwrap(),
+                value @ Value::Number(_) => write!(&mut bytes, "{}", value.display()).unwrap(),
                 Value::String(s) => bytes.extend(s.as_bytes()),
                 _ => unreachable!(),
             }
@@ -902,7 +902,7 @@ pub fn concat_separated<'gc>(
                 bytes.extend(&*sep_str);
                 match val {
                     Value::Integer(i) => write!(&mut bytes, "{}", i).unwrap(),
-                    Value::Number(n) => write!(&mut bytes, "{}", n).unwrap(),
+                    value @ Value::Number(_) => write!(&mut bytes, "{}", value.display()).unwrap(),
                     Value::String(s) => bytes.extend(s.as_bytes()),
                     _ => unreachable!(),
                 }

@@ -52,3 +52,14 @@ do
     assert(table.concat(t, "", 1, #t) == "abcdefghijklmnopqrstuvwxyz")
     assert(table.concat(t, "!", 1, #t) == "a!b!c!d!e!f!g!h!i!j!k!l!m!n!o!p!q!r!s!t!u!v!w!x!y!z")
 end
+
+do
+    local n = 0.30000000000000004
+    assert(tostring(n) == "0.3")
+
+    local t = { n }
+    assert(table.concat(t) == "0.3")
+
+    local t = { n, n }
+    assert(table.concat(t, ",") == "0.3,0.3")
+end

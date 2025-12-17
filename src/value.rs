@@ -61,7 +61,28 @@ impl<'gc> Value<'gc> {
                     Value::Nil => write!(fmt, "nil"),
                     Value::Boolean(b) => write!(fmt, "{}", b),
                     Value::Integer(i) => write!(fmt, "{}", i),
-                    Value::Number(f) => write!(fmt, "{}", f),
+                    Value::Number(f) => {
+                        // Clippy: Truncation and sign loss is deliberate.
+                        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+                        let exp = (f.abs() as u64).max(1).ilog10() as usize;
+                        let len = 14_usize.checked_sub(exp + 1);
+                        if let Some(len) = len {
+                            let zero = if len == 0 { ".0" } else { "" };
+                            let s = format!("{f:.len$}{zero}");
+                            let b = s.as_bytes();
+                            let end = b
+                                .iter()
+                                .rposition(|c| *c != b'0')
+                                .map_or(b.len(), |e| 1 + e + usize::from(b[e] == b'.'));
+                            write!(fmt, "{}", &s[..end])
+                        } else {
+                            // Clippy: The number is always positive and in range.
+                            #[allow(clippy::cast_possible_truncation, clippy::cast_possible_wrap)]
+                            {
+                                write!(fmt, "{:.13}e+{exp}", f / 10.0_f64.powi(exp as i32))
+                            }
+                        }
+                    }
                     Value::String(s) => write!(fmt, "{}", s.display_lossy()),
                     Value::Table(t) => write!(fmt, "<table {:p}>", Gc::as_ptr(t.into_inner())),
                     Value::Function(Function::Closure(c)) => {
@@ -154,8 +175,9 @@ impl<'gc> Value<'gc> {
     /// returned string will always be the same as what [`Value::display`] would display.
     pub fn into_string(self, ctx: crate::Context<'gc>) -> Option<String<'gc>> {
         match self {
-            Value::Integer(i) => Some(ctx.intern(i.to_string().as_bytes())),
-            Value::Number(n) => Some(ctx.intern(n.to_string().as_bytes())),
+            v @ (Value::Number(_) | Value::Integer(_)) => {
+                Some(ctx.intern(v.display().to_string().as_bytes()))
+            }
             Value::String(s) => Some(s),
             _ => None,
         }
