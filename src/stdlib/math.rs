@@ -198,13 +198,25 @@ pub fn load_float<'gc>(ctx: Context<'gc>, math: Table<'gc>) {
     math.set_field(
         ctx,
         "ceil",
-        callback("ceil", &ctx, |_, v: f64| Some(to_int(v.ceil().into()))),
+        callback("ceil", &ctx, |_, v: Value<'_>| {
+            if let Value::Integer(v) = v {
+                Some(Value::Integer(v))
+            } else {
+                v.to_number().map(|v| to_int(v.ceil().into()))
+            }
+        }),
     );
 
     math.set_field(
         ctx,
         "floor",
-        callback("floor", &ctx, |_, v: f64| Some(to_int(v.floor().into()))),
+        callback("floor", &ctx, |_, v: Value<'_>| {
+            if let Value::Integer(v) = v {
+                Some(Value::Integer(v))
+            } else {
+                v.to_number().map(|v| to_int(v.floor().into()))
+            }
+        }),
     );
 
     math.set_field(
@@ -243,16 +255,28 @@ pub fn load_float<'gc>(ctx: Context<'gc>, math: Table<'gc>) {
     math.set_field(
         ctx,
         "fmod",
-        callback("fmod", &ctx, |_, (f, g): (f64, f64)| {
-            let result = (f % g).abs();
-            Some(if f < 0.0 { -result } else { result })
+        callback("fmod", &ctx, |_, (f, g): (Value<'_>, Value<'_>)| {
+            if let (Value::Integer(f), Value::Integer(g)) = (f, g) {
+                f.checked_rem(g).map(Value::Integer)
+            } else {
+                f.to_number().zip(g.to_number()).map(|(f, g)| {
+                    let result = (f % g).abs();
+                    Value::Number(if f < 0.0 { -result } else { result })
+                })
+            }
         }),
     );
 
     math.set_field(
         ctx,
         "modf",
-        callback("modf", &ctx, |_, f: f64| Some((f as i64, f % 1.0))),
+        callback("modf", &ctx, |_, f: Value<'_>| {
+            if let Value::Integer(i) = f {
+                Some((i, 0.0))
+            } else {
+                f.to_number().map(|f| (f as i64, f % 1.0))
+            }
+        }),
     );
 }
 

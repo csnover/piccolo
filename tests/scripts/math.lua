@@ -339,3 +339,11 @@ do
     assert(is_err(function() return "" + 2 end))
     assert(" 0x0 " + 2 == 2)
 end
+
+do
+    assert(math.floor(9007199254740993) == 9007199254740993)
+    assert(math.ceil(9007199254740993) == 9007199254740993)
+    assert(math.fmod(9007199254740993, 9007199254740995) == 9007199254740993)
+    local a, b = math.modf(9007199254740993)
+    assert(a == 9007199254740993 and b == 0.0)
+end
